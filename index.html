@@ -39,57 +39,58 @@
     pointer-events: none;
     z-index: 0;
   }
-  .container {
-    max-width: 480px;
-    margin: 0 auto;
-    padding: 20px 16px;
-    position: relative;
-    z-index: 1;
-  }
-  header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 24px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--border);
-  }
-  .logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .logo-icon {
-    width: 36px;
-    height: 36px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-  }
-  .logo h1 {
-    font-size: 18px;
-    font-weight: 800;
-    letter-spacing: -0.5px;
-  }
-  .logo span {
-    color: var(--accent);
-  }
-  .add-btn {
-    background: var(--accent);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 8px 16px;
-    font-family: 'Syne', sans-serif;
-    font-weight: 600;
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .add-btn:hover { background: #ff6a00; transform: translateY(-1px); }
+
+.container {
+max-width: 480px;
+margin: 0 auto;
+padding: 20px 16px;
+position: relative;
+z-index: 1;
+}
+header {
+display: flex;
+align-items: center;
+justify-content: space-between;
+margin-bottom: 24px;
+padding-bottom: 16px;
+border-bottom: 1px solid var(–border);
+}
+.logo {
+display: flex;
+align-items: center;
+gap: 10px;
+}
+.logo-icon {
+width: 36px;
+height: 36px;
+background: linear-gradient(135deg, var(–accent), var(–accent2));
+border-radius: 8px;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 18px;
+}
+.logo h1 {
+font-size: 18px;
+font-weight: 800;
+letter-spacing: -0.5px;
+}
+.logo span {
+color: var(–accent);
+}
+.add-btn {
+background: var(–accent);
+color: white;
+border: none;
+border-radius: 8px;
+padding: 8px 16px;
+font-family: ‘Syne’, sans-serif;
+font-weight: 600;
+font-size: 14px;
+cursor: pointer;
+transition: all 0.2s;
+}
+.add-btn:hover { background: #ff6a00; transform: translateY(-1px); }
 
 .stats {
 display: grid;
@@ -986,11 +987,13 @@ function openDetail(id) {
   renderDetail();
   document.getElementById('detail-page').classList.add('show');
   document.body.style.overflow = 'hidden';
+  document.querySelector('.container').style.display = 'none';
 }
 
 function closeDetail() {
   document.getElementById('detail-page').classList.remove('show');
   document.body.style.overflow = '';
+  document.querySelector('.container').style.display = '';
   detailId = null;
 }
 
