@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔥 Airdrop Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --card: #1a1a26;
+    --border: #2a2a3a;
+    --accent: #ff4d00;
+    --accent2: #ffa500;
+    --text: #f0f0ff;
+    --muted: #666680;
+    --green: #00ff88;
+    --blue: #4d88ff;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(ellipse at 20% 20%, rgba(255,77,0,0.05) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(77,136,255,0.05) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .container {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 20px 16px;
+    position: relative;
+    z-index: 1;
+  }
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo-icon {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+  .logo h1 {
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+  .logo span {
+    color: var(--accent);
+  }
+  .add-btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .add-btn:hover { background: #ff6a00; transform: translateY(-1px); }
+
+.stats {
+display: grid;
+grid-template-columns: repeat(3, 1fr);
+gap: 10px;
+margin-bottom: 20px;
+}
+.stat-card {
+background: var(–card);
+border: 1px solid var(–border);
+border-radius: 12px;
+padding: 12px;
+text-align: center;
+}
+.stat-num {
+font-size: 24px;
+font-weight: 800;
+font-family: ‘Space Mono’, monospace;
+}
+.stat-label {
+font-size: 11px;
+color: var(–muted);
+margin-top: 2px;
+}
+
+.filter-tabs {
+display: flex;
+gap: 8px;
+margin-bottom: 16px;
+overflow-x: auto;
+padding-bottom: 4px;
+}
+.filter-tabs::-webkit-scrollbar { display: none; }
+.tab {
+background: var(–card);
+border: 1px solid var(–border);
+border-radius: 20px;
+padding: 6px 14px;
+font-size: 13px;
+cursor: pointer;
+white-space: nowrap;
+transition: all 0.2s;
+font-family: ‘Syne’, sans-serif;
+color: var(–muted);
+}
+.tab.active {
+background: var(–accent);
+border-color: var(–accent);
+color: white;
+}
+
+.project-list { display: flex; flex-direction: column; gap: 12px; }
+
+.project-card {
+background: var(–card);
+border: 1px solid var(–border);
+border-radius: 16px;
+padding: 16px;
+cursor: pointer;
+transition: all 0.2s;
+position: relative;
+overflow: hidden;
+}
+.project-card::before {
+content: ‘’;
+position: absolute;
+top: 0;
+left: 0;
+width: 4px;
+height: 100%;
+background: linear-gradient(to bottom, var(–accent), var(–accent2));
+border-radius: 4px 0 0 4px;
+}
+.project-card.early::before {
+background: linear-gradient(to bottom, var(–green), #00aa55);
+}
+.project-card:hover { border-color: var(–accent); transform: translateY(-2px); }
+
+.card-top {
+display: flex;
+align-items: flex-start;
+justify-content: space-between;
+margin-bottom: 10px;
+}
+.project-name {
+font-size: 16px;
+font-weight: 700;
+letter-spacing: -0.3px;
+}
+.badges {
+display: flex;
+gap: 6px;
+flex-wrap: wrap;
+margin-top: 4px;
+}
+.badge {
+font-size: 10px;
+padding: 2px 8px;
+border-radius: 20px;
+font-weight: 600;
+font-family: ‘Space Mono’, monospace;
+}
+.badge-early {
+background: rgba(0,255,136,0.15);
+color: var(–green);
+border: 1px solid rgba(0,255,136,0.3);
+}
+.badge-status {
+background: rgba(77,136,255,0.15);
+color: var(–blue);
+border: 1px solid rgba(77,136,255,0.3);
+}
+.badge-done {
+background: rgba(255,255,255,0.08);
+color: var(–muted);
+border: 1px solid var(–border);
+}
+
+.heat {
+font-size: 18px;
+letter-spacing: 2px;
+}
+
+.card-meta {
+display: grid;
+grid-template-columns: repeat(2, 1fr);
+gap: 8px;
+margin-bottom: 10px;
+}
+.meta-item {
+background: var(–surface);
+border-radius: 8px;
+padding: 8px;
+}
+.meta-key {
+font-size: 10px;
+color: var(–muted);
+margin-bottom: 2px;
+font-family: ‘Space Mono’, monospace;
+}
+.meta-val {
+font-size: 13px;
+font-weight: 600;
+}
+
+.tasks-preview {
+margin-top: 8px;
+}
+.tasks-label {
+font-size: 11px;
+color: var(–muted);
+margin-bottom: 6px;
+font-family: ‘Space Mono’, monospace;
+}
+.task-item {
+display: flex;
+align-items: center;
+gap: 8px;
+padding: 4px 0;
+font-size: 12px;
+}
+.task-check {
+width: 16px;
+height: 16px;
+border-radius: 4px;
+border: 1px solid var(–border);
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+flex-shrink: 0;
+transition: all 0.2s;
+}
+.task-check.done {
+background: var(–green);
+border-color: var(–green);
+color: #000;
+font-size: 10px;
+}
+.task-text.done { text-decoration: line-through; color: var(–muted); }
+
+.card-actions {
+display: flex;
+gap: 8px;
+margin-top: 12px;
+padding-top: 12px;
+border-top: 1px solid var(–border);
+}
+.action-btn {
+flex: 1;
+background: var(–surface);
+border: 1px solid var(–border);
+border-radius: 8px;
+padding: 8px;
+font-size: 12px;
+cursor: pointer;
+color: var(–text);
+font-family: ‘Syne’, sans-serif;
+transition: all 0.2s;
+text-align: center;
+}
+.action-btn:hover { border-color: var(–accent); color: var(–accent); }
+.action-btn.danger:hover { border-color: #ff4455; color: #ff4455; }
+
+/* Modal */
+.modal-overlay {
+display: none;
+position: fixed;
+inset: 0;
+background: rgba(0,0,0,0.8);
+z-index: 100;
+align-items: flex-end;
+justify-content: center;
+padding: 0;
+}
+.modal-overlay.show { display: flex; }
+.modal {
+background: var(–surface);
+border-radius: 20px 20px 0 0;
+padding: 24px 20px;
+width: 100%;
+max-width: 480px;
+max-height: 90vh;
+overflow-y: auto;
+border: 1px solid var(–border);
+border-bottom: none;
+animation: slideUp 0.3s ease;
+}
+@keyframes slideUp {
+from { transform: translateY(100%); }
+to { transform: translateY(0); }
+}
+.modal-handle {
+width: 40px;
+height: 4px;
+background: var(–border);
+border-radius: 2px;
+margin: 0 auto 20px;
+}
+.modal h2 {
+font-size: 20px;
+font-weight: 800;
+margin-bottom: 20px;
+}
+.form-group { margin-bottom: 16px; }
+.form-label {
+font-size: 12px;
+color: var(–muted);
+margin-bottom: 6px;
+display: block;
+font-family: ‘Space Mono’, monospace;
+}
+.form-input, .form-select, .form-textarea {
+width: 100%;
+background: var(–card);
+border: 1px solid var(–border);
+border-radius: 10px;
+padding: 10px 14px;
+color: var(–text);
+font-family: ‘Syne’, sans-serif;
+font-size: 14px;
+outline: none;
+transition: border-color 0.2s;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+border-color: var(–accent);
+}
+.form-select option { background: var(–card); }
+.form-textarea { resize: none; height: 80px; }
+
+.heat-selector {
+display: flex;
+gap: 8px;
+}
+.heat-opt {
+flex: 1;
+background: var(–card);
+border: 1px solid var(–border);
+border-radius: 10px;
+padding: 10px;
+text-align: center;
+cursor: pointer;
+font-size: 18px;
+transition: all 0.2s;
+}
+.heat-opt.selected {
+border-color: var(–accent);
+background: rgba(255,77,0,0.1);
+}
+
+.tasks-editor { display: flex; flex-direction: column; gap: 6px; }
+.task-input-row {
+display: flex;
+gap: 8px;
+align-items: center;
+}
+.task-input-row input {
+flex: 1;
+background: var(–card);
+border: 1px solid var(–border);
+border-radius: 8px;
+padding: 8px 12px;
+color: var(–text);
+font-family: ‘Syne’, sans-serif;
+font-size: 13px;
+outline: none;
+}
+.task-input-row input:focus { border-color: var(–accent); }
+.remove-task {
+background: none;
+border: none;
+color: var(–muted);
+cursor: pointer;
+font-size: 18px;
+line-height: 1;
+padding: 4px;
+}
+.add-task-btn {
+background: none;
+border: 1px dashed var(–border);
+border-radius: 8px;
+padding: 8px;
+color: var(–muted);
+cursor: pointer;
+font-size: 13px;
+font-family: ‘Syne’, sans-serif;
+transition: all 0.2s;
+}
+.add-task-btn:hover { border-color: var(–accent); color: var(–accent); }
+
+.modal-actions {
+display: flex;
+gap: 10px;
+margin-top: 20px;
+}
+.btn-cancel {
+flex: 1;
+background: var(–card);
+border: 1px solid var(–border);
+border-radius: 10px;
+padding: 12px;
+color: var(–text);
+font-family: ‘Syne’, sans-serif;
+font-size: 15px;
+cursor: pointer;
+}
+.btn-save {
+flex: 2;
+background: var(–accent);
+border: none;
+border-radius: 10px;
+padding: 12px;
+color: white;
+font-family: ‘Syne’, sans-serif;
+font-size: 15px;
+font-weight: 700;
+cursor: pointer;
+transition: all 0.2s;
+}
+.btn-save:hover { background: #ff6a00; }
+
+.empty {
+text-align: center;
+padding: 60px 20px;
+color: var(–muted);
+}
+.empty-icon { font-size: 48px; margin-bottom: 16px; }
+.empty h3 { font-size: 18px; margin-bottom: 8px; }
+.empty p { font-size: 13px; }
+
+/* Detail Page */
+.detail-page {
+display: none;
+position: fixed;
+inset: 0;
+background: var(–bg);
+z-index: 200;
+overflow-y: auto;
+}
+.detail-page.show { display: block; animation: slideInRight 0.3s ease; }
+@keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
+.detail-container { max-width: 480px; margin: 0 auto; padding: 20px 16px 40px; }
+.detail-header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(–border); }
+.back-btn { background: var(–card); border: 1px solid var(–border); border-radius: 10px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px; color: var(–text); flex-shrink: 0; }
+.detail-title { flex: 1; }
+.detail-title h2 { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
+.detail-heat { font-size: 22px; }
+.detail-section { background: var(–card); border: 1px solid var(–border); border-radius: 16px; padding: 16px; margin-bottom: 12px; }
+.detail-section-title { font-size: 11px; color: var(–muted); font-family: ‘Space Mono’, monospace; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
+.detail-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.detail-meta { background: var(–surface); border-radius: 10px; padding: 10px; }
+.detail-task { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(–surface); border-radius: 10px; margin-bottom: 8px; cursor: pointer; transition: all 0.2s; border: 1px solid transparent; }
+.detail-task:last-child { margin-bottom: 0; }
+.detail-task:hover { border-color: var(–accent); }
+.detail-task-check { width: 26px; height: 26px; border-radius: 6px; border: 2px solid var(–border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 14px; font-weight: 700; transition: all 0.2s; }
+.detail-task-check.done { background: var(–green); border-color: var(–green); color: #000; }
+.detail-task-text { font-size: 14px; flex: 1; }
+.detail-task-text.done { text-decoration: line-through; color: var(–muted); }
+.detail-memo { font-size: 14px; line-height: 1.7; color: #c0c0d0; }
+.detail-actions { display: flex; gap: 10px; margin-top: 16px; }
+.detail-btn { flex: 1; border-radius: 12px; padding: 14px; font-family: ‘Syne’, sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; text-align: center; border: 1px solid var(–border); background: var(–card); color: var(–text); transition: all 0.2s; }
+.detail-btn.primary { background: var(–accent); border-color: var(–accent); color: white; }
+.detail-btn.danger { color: #ff4455; }
+.detail-btn:hover { opacity: 0.85; }
+.task-progress-bar { height: 6px; background: var(–border); border-radius: 3px; margin-bottom: 14px; overflow: hidden; }
+.task-progress-fill { height: 100%; background: linear-gradient(to right, var(–green), #00aa55); border-radius: 3px; transition: width 0.3s; }
+
+```
+.return-badge {
+display: inline-block;
+padding: 2px 8px;
+border-radius: 20px;
+font-size: 11px;
+font-weight: 700;
+```
+
+}
+.return-small { background: rgba(255,255,255,0.1); color: var(–muted); }
+.return-medium { background: rgba(77,136,255,0.2); color: var(–blue); }
+.return-large { background: rgba(255,165,0,0.2); color: var(–accent2); }
+.return-moon { background: rgba(255,77,0,0.2); color: var(–accent); }
+</style>
+
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="logo">
+      <div class="logo-icon">🔥</div>
+      <h1>Airdrop<span>HUNT</span></h1>
+    </div>
+    <button class="add-btn" onclick="openModal()">＋ 追加</button>
+  </header>
+
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-num" id="stat-total" style="color: var(--text)">0</div>
+      <div class="stat-label">プロジェクト</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-early" style="color: var(--green)">0</div>
+      <div class="stat-label">早期参入</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-hot" style="color: var(--accent)">0</div>
+      <div class="stat-label">🔥🔥🔥</div>
+    </div>
+  </div>
+
+  <div class="filter-tabs">
+    <div class="tab active" onclick="setFilter('all', this)">すべて</div>
+    <div class="tab" onclick="setFilter('early', this)">⚡ 早期参入</div>
+    <div class="tab" onclick="setFilter('hot', this)">🔥 激熱</div>
+    <div class="tab" onclick="setFilter('active', this)">参加中</div>
+    <div class="tab" onclick="setFilter('done', this)">完了</div>
+  </div>
+
+  <div class="project-list" id="project-list"></div>
+</div>
+
+<!-- Detail Page -->
+
+<div class="detail-page" id="detail-page">
+  <div class="detail-container">
+    <div class="detail-header">
+      <div class="back-btn" onclick="closeDetail()">←</div>
+      <div class="detail-title">
+        <h2 id="d-name"></h2>
+        <div class="badges" id="d-badges"></div>
+      </div>
+      <div class="detail-heat" id="d-heat"></div>
+    </div>
+
+```
+<div class="detail-section">
+  <div class="detail-section-title">プロジェクト情報</div>
+  <div class="detail-grid">
+    <div class="detail-meta">
+      <div class="meta-key">期待リターン</div>
+      <div class="meta-val" id="d-return"></div>
+    </div>
+    <div class="detail-meta">
+      <div class="meta-key">参入タイミング</div>
+      <div class="meta-val" style="font-size:12px" id="d-timing"></div>
+    </div>
+    <div class="detail-meta">
+      <div class="meta-key">早期参入</div>
+      <div class="meta-val" id="d-early"></div>
+    </div>
+    <div class="detail-meta">
+      <div class="meta-key">ステータス</div>
+      <div class="meta-val" id="d-status"></div>
+    </div>
+  </div>
+</div>
+
+<div class="detail-section" id="d-tasks-section">
+  <div class="detail-section-title">タスク <span id="d-task-count"></span></div>
+  <div class="task-progress-bar"><div class="task-progress-fill" id="d-progress"></div></div>
+  <div id="d-tasks"></div>
+</div>
+
+<div class="detail-section" id="d-memo-section">
+  <div class="detail-section-title">メモ・情報</div>
+  <div class="detail-memo" id="d-memo"></div>
+</div>
+
+<div class="detail-actions">
+  <button class="detail-btn danger" onclick="deleteFromDetail()">🗑️ 削除</button>
+  <button class="detail-btn" onclick="openModalFromDetail()">✏️ 編集</button>
+  <button class="detail-btn primary" id="d-url-btn" onclick="openDetailUrl()">🔗 サイト</button>
+</div>
+```
+
+  </div>
+</div>
+
+<!-- Modal -->
+
+<div class="modal-overlay" id="modal" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h2 id="modal-title">🔥 プロジェクト追加</h2>
+
+```
+<div class="form-group">
+  <label class="form-label">プロジェクト名 *</label>
+  <input class="form-input" id="f-name" placeholder="例: LayerZero">
+</div>
+
+<div class="form-group">
+  <label class="form-label">熱さレベル</label>
+  <div class="heat-selector">
+    <div class="heat-opt" onclick="selectHeat(1, this)">🔥</div>
+    <div class="heat-opt selected" onclick="selectHeat(2, this)">🔥🔥</div>
+    <div class="heat-opt" onclick="selectHeat(3, this)">🔥🔥🔥</div>
+  </div>
+</div>
+
+<div class="form-group">
+  <label class="form-label">早期参入</label>
+  <select class="form-select" id="f-early">
+    <option value="yes">⚡ 早期参入あり（テストネット・α版等）</option>
+    <option value="no">通常参入</option>
+  </select>
+</div>
+
+<div class="form-group">
+  <label class="form-label">ステータス</label>
+  <select class="form-select" id="f-status">
+    <option value="active">参加中</option>
+    <option value="watching">ウォッチ中</option>
+    <option value="done">完了</option>
+  </select>
+</div>
+
+<div class="form-group">
+  <label class="form-label">期待リターン</label>
+  <select class="form-select" id="f-return">
+    <option value="small">小（〜$100）</option>
+    <option value="medium">中（〜$1,000）</option>
+    <option value="large">大（〜$10,000）</option>
+    <option value="moon">🚀 爆発（$10,000〜）</option>
+  </select>
+</div>
+
+<div class="form-group">
+  <label class="form-label">参入タイミング</label>
+  <input class="form-input" id="f-timing" placeholder="例: テストネット初日">
+</div>
+
+<div class="form-group">
+  <label class="form-label">公式URL</label>
+  <input class="form-input" id="f-url" placeholder="https://...">
+</div>
+
+<div class="form-group">
+  <label class="form-label">メモ</label>
+  <textarea class="form-textarea" id="f-memo" placeholder="VC情報・特記事項など"></textarea>
+</div>
+
+<div class="form-group">
+  <label class="form-label">タスク（毎日やること）</label>
+  <div class="tasks-editor" id="tasks-editor"></div>
+  <button class="add-task-btn" onclick="addTaskInput()" style="margin-top:8px; width:100%">＋ タスク追加</button>
+</div>
+
+<div class="modal-actions">
+  <button class="btn-cancel" onclick="closeModal()">キャンセル</button>
+  <button class="btn-save" onclick="saveProject()">保存する</button>
+</div>
+```
+
+  </div>
+</div>
+
+<script>
+const defaultProjects = [
+  {
+    id: 1,
+    name: 'MetaMask (MASK)',
+    heat: 3,
+    early: 'yes',
+    status: 'active',
+    return: 'moon',
+    timing: 'リワードプログラム開始直後',
+    url: 'https://metamask.io',
+    memo: 'Consensys CEO が「予想より早く来る」と発言。MetaMask Rewardsでスワップするとポイント獲得。$10B以上のユーザー基盤。',
+    tasks: [
+      { text: 'MetaMask Rewardsでスワップ', done: false },
+      { text: 'Lineaへブリッジ', done: false },
+      { text: 'Discordでアクティブに', done: false }
+    ]
+  },
+  {
+    id: 2,
+    name: 'Base (Coinbase L2)',
+    heat: 3,
+    early: 'yes',
+    status: 'active',
+    return: 'moon',
+    timing: 'トークン探索発表直後',
+    url: 'https://base.org',
+    memo: 'Coinbase創業後初のトークン。上場企業初のL2トークンになる可能性。Jesse Pollakが2025年9月に探索を発表。',
+    tasks: [
+      { text: 'Baseでスワップ・取引', done: false },
+      { text: 'BaseのDAppsを使う', done: false },
+      { text: 'ETHをBaseにブリッジ', done: false }
+    ]
+  },
+  {
+    id: 3,
+    name: 'OpenSea (SEA)',
+    heat: 3,
+    early: 'no',
+    status: 'active',
+    return: 'large',
+    timing: '2026年Q1ローンチ予定',
+    url: 'https://opensea.io',
+    memo: 'コミュニティに50%配布予定。売上の50%でSEAをバイバック。2026年Q1ローンチ確定済み。',
+    tasks: [
+      { text: 'OpenSeaで取引・購入', done: false },
+      { text: 'NFTをリスト出品', done: false }
+    ]
+  },
+  {
+    id: 4,
+    name: 'Polymarket (POLY)',
+    heat: 2,
+    early: 'no',
+    status: 'active',
+    return: 'large',
+    timing: '2025年末〜2026年初',
+    url: 'https://polymarket.com',
+    memo: '予測市場大手。CMOがエアドロップ含むローンチを確認。米国再上陸後に注目度急上昇。',
+    tasks: [
+      { text: 'Polymarketで予測に参加', done: false },
+      { text: '流動性提供', done: false }
+    ]
+  },
+  {
+    id: 5,
+    name: 'Linea (Consensys)',
+    heat: 2,
+    early: 'yes',
+    status: 'active',
+    return: 'large',
+    timing: 'テストネット初期から参加',
+    url: 'https://linea.build',
+    memo: 'MetaMask開発チスト製のzkEVM L2。「インサイダーなし・抽出なし」の公平モデル。MetaMask Rewardsポイントと連動。',
+    tasks: [
+      { text: 'LineaでDeFi操作', done: false },
+      { text: 'Lineaにブリッジ', done: false },
+      { text: 'Lineaのクエストをこなす', done: false }
+    ]
+  },
+  {
+    id: 6,
+    name: 'Monad',
+    heat: 3,
+    early: 'yes',
+    status: 'watching',
+    return: 'moon',
+    timing: 'テストネット参加中',
+    url: 'https://monad.xyz',
+    memo: 'Paradigm・DragonFly出資で$244M調達。EVM互換L1で10,000TPS。テストネット早期参加者への報酬が期待大。',
+    tasks: [
+      { text: 'Monadテストネットに参加', done: false },
+      { text: 'テストネットトークンを取得', done: false },
+      { text: 'Discordでアクティブに', done: false }
+    ]
+  },
+  {
+    id: 7,
+    name: 'Grass (DePIN)',
+    heat: 2,
+    early: 'yes',
+    status: 'active',
+    return: 'medium',
+    timing: 'シーズン2開始直後',
+    url: 'https://getgrass.io',
+    memo: 'インターネット帯域幅を共有してポイント獲得。シーズン2は1億7000万トークンプール。H1 2026スナップショット予定。',
+    tasks: [
+      { text: 'Grass拡張機能を起動したまま', done: false },
+      { text: 'リファラルで招待', done: false }
+    ]
+  },
+  {
+    id: 8,
+    name: 'Lighter (LIT)',
+    heat: 2,
+    early: 'yes',
+    status: 'active',
+    return: 'medium',
+    timing: '2025年5月から参加',
+    url: 'https://lighter.xyz',
+    memo: '取引量ベースのDEX。有機的なトレード活動を報酬。ウォッシュトレードは除外される。',
+    tasks: [
+      { text: '対象ペアで取引', done: false },
+      { text: 'ポイント・リワード確認', done: false }
+    ]
+  },
+  {
+    id: 9,
+    name: 'Ethereal',
+    heat: 1,
+    early: 'yes',
+    status: 'watching',
+    return: 'medium',
+    timing: '2024年12月から参加可能',
+    url: 'https://ethereal.trade',
+    memo: 'ポイントファーミング型。早期参加者に有利な構造。',
+    tasks: [
+      { text: 'ポイントファーミング実施', done: false }
+    ]
+  }
+];
+
+let projects = JSON.parse(localStorage.getItem('airdrop-projects') || 'null');
+if (!projects) {
+  projects = defaultProjects;
+}
+let currentFilter = 'all';
+let editingId = null;
+let selectedHeat = 2;
+
+function save() {
+  localStorage.setItem('airdrop-projects', JSON.stringify(projects));
+}
+
+function setFilter(f, el) {
+  currentFilter = f;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
+
+function selectHeat(level, el) {
+  selectedHeat = level;
+  document.querySelectorAll('.heat-opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function addTaskInput(val = '') {
+  const editor = document.getElementById('tasks-editor');
+  const row = document.createElement('div');
+  row.className = 'task-input-row';
+  row.innerHTML = `<input type="text" placeholder="タスク内容" value="${val}"><button class="remove-task" onclick="this.parentElement.remove()">×</button>`;
+  editor.appendChild(row);
+}
+
+function openModal(id = null) {
+  editingId = id;
+  selectedHeat = 2;
+  document.getElementById('tasks-editor').innerHTML = '';
+
+  if (id !== null) {
+    const p = projects.find(x => x.id === id);
+    document.getElementById('modal-title').textContent = '✏️ プロジェクト編集';
+    document.getElementById('f-name').value = p.name;
+    document.getElementById('f-early').value = p.early;
+    document.getElementById('f-status').value = p.status;
+    document.getElementById('f-return').value = p.return;
+    document.getElementById('f-timing').value = p.timing || '';
+    document.getElementById('f-url').value = p.url || '';
+    document.getElementById('f-memo').value = p.memo || '';
+    selectedHeat = p.heat;
+    document.querySelectorAll('.heat-opt').forEach((o, i) => {
+      o.classList.toggle('selected', i + 1 === selectedHeat);
+    });
+    (p.tasks || []).forEach(t => addTaskInput(t.text));
+  } else {
+    document.getElementById('modal-title').textContent = '🔥 プロジェクト追加';
+    document.getElementById('f-name').value = '';
+    document.getElementById('f-early').value = 'yes';
+    document.getElementById('f-status').value = 'active';
+    document.getElementById('f-return').value = 'medium';
+    document.getElementById('f-timing').value = '';
+    document.getElementById('f-url').value = '';
+    document.getElementById('f-memo').value = '';
+    document.querySelectorAll('.heat-opt').forEach((o, i) => {
+      o.classList.toggle('selected', i === 1);
+    });
+  }
+
+  document.getElementById('modal').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('show');
+  editingId = null;
+}
+
+function closeModalOutside(e) {
+  if (e.target === document.getElementById('modal')) closeModal();
+}
+
+function saveProject() {
+  const name = document.getElementById('f-name').value.trim();
+  if (!name) { alert('プロジェクト名を入力してください'); return; }
+
+  const taskInputs = document.querySelectorAll('#tasks-editor input');
+  const tasks = Array.from(taskInputs).map(inp => ({
+    text: inp.value.trim(),
+    done: false
+  })).filter(t => t.text);
+
+  const data = {
+    name,
+    heat: selectedHeat,
+    early: document.getElementById('f-early').value,
+    status: document.getElementById('f-status').value,
+    return: document.getElementById('f-return').value,
+    timing: document.getElementById('f-timing').value,
+    url: document.getElementById('f-url').value,
+    memo: document.getElementById('f-memo').value,
+    tasks
+  };
+
+  if (editingId !== null) {
+    const idx = projects.findIndex(x => x.id === editingId);
+    const existing = projects[idx];
+    // Preserve task done states
+    data.tasks = data.tasks.map(t => {
+      const old = existing.tasks?.find(ot => ot.text === t.text);
+      return old ? { ...t, done: old.done } : t;
+    });
+    projects[idx] = { ...existing, ...data };
+  } else {
+    projects.unshift({ ...data, id: Date.now() });
+  }
+
+  save();
+  closeModal();
+  render();
+}
+
+function deleteProject(id) {
+  if (!confirm('削除しますか？')) return;
+  projects = projects.filter(p => p.id !== id);
+  save();
+  render();
+}
+
+function toggleTask(projectId, taskIdx) {
+  const p = projects.find(x => x.id === projectId);
+  if (p && p.tasks[taskIdx]) {
+    p.tasks[taskIdx].done = !p.tasks[taskIdx].done;
+    save();
+    render();
+  }
+}
+
+function getReturnBadge(r) {
+  const map = {
+    small: ['small', '〜$100'],
+    medium: ['medium', '〜$1,000'],
+    large: ['large', '〜$10,000'],
+    moon: ['moon', '🚀 爆発']
+  };
+  const [cls, label] = map[r] || ['small', r];
+  return `<span class="return-badge return-${cls}">${label}</span>`;
+}
+
+function getStatusLabel(s) {
+  return { active: '参加中', watching: 'ウォッチ中', done: '完了' }[s] || s;
+}
+
+
+let detailId = null;
+
+function openDetail(id) {
+  detailId = id;
+  renderDetail();
+  document.getElementById('detail-page').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDetail() {
+  document.getElementById('detail-page').classList.remove('show');
+  document.body.style.overflow = '';
+  detailId = null;
+}
+
+function renderDetail() {
+  if (detailId === null) return;
+  const p = projects.find(x => x.id === detailId);
+  if (!p) return;
+
+  document.getElementById('d-name').textContent = p.name;
+  document.getElementById('d-heat').textContent = '🔥'.repeat(p.heat);
+
+  const badges = document.getElementById('d-badges');
+  badges.innerHTML = (p.early === 'yes' ? '<span class="badge badge-early">⚡ 早期参入</span>' : '') +
+    `<span class="badge ${p.status === 'done' ? 'badge-done' : 'badge-status'}">${getStatusLabel(p.status)}</span>`;
+
+  document.getElementById('d-return').innerHTML = getReturnBadge(p.return);
+  document.getElementById('d-timing').textContent = p.timing || '—';
+  document.getElementById('d-early').textContent = p.early === 'yes' ? '⚡ あり' : 'なし';
+  document.getElementById('d-status').textContent = getStatusLabel(p.status);
+
+  const tasks = p.tasks || [];
+  const done = tasks.filter(t => t.done).length;
+  document.getElementById('d-task-count').textContent = `${done}/${tasks.length}`;
+  document.getElementById('d-progress').style.width = tasks.length ? `${(done/tasks.length)*100}%` : '0%';
+
+  const tasksEl = document.getElementById('d-tasks');
+  if (tasks.length === 0) {
+    document.getElementById('d-tasks-section').style.display = 'none';
+  } else {
+    document.getElementById('d-tasks-section').style.display = 'block';
+    tasksEl.innerHTML = tasks.map((t, i) => `
+      <div class="detail-task" onclick="toggleDetailTask(${i})">
+        <div class="detail-task-check ${t.done ? 'done' : ''}">${t.done ? '✓' : ''}</div>
+        <span class="detail-task-text ${t.done ? 'done' : ''}">${t.text}</span>
+      </div>
+    `).join('');
+  }
+
+  const memoSection = document.getElementById('d-memo-section');
+  if (p.memo) {
+    memoSection.style.display = 'block';
+    document.getElementById('d-memo').textContent = p.memo;
+  } else {
+    memoSection.style.display = 'none';
+  }
+
+  const urlBtn = document.getElementById('d-url-btn');
+  urlBtn.style.display = p.url ? '' : 'none';
+}
+
+function toggleDetailTask(taskIdx) {
+  const p = projects.find(x => x.id === detailId);
+  if (p && p.tasks[taskIdx]) {
+    p.tasks[taskIdx].done = !p.tasks[taskIdx].done;
+    save();
+    renderDetail();
+    render();
+  }
+}
+
+function deleteFromDetail() {
+  if (!confirm('削除しますか？')) return;
+  projects = projects.filter(p => p.id !== detailId);
+  save();
+  closeDetail();
+  render();
+}
+
+function openModalFromDetail() {
+  const id = detailId;
+  closeDetail();
+  openModal(id);
+}
+
+function openDetailUrl() {
+  const p = projects.find(x => x.id === detailId);
+  if (p && p.url) window.open(p.url, '_blank');
+}
+
+function render() {
+  const list = document.getElementById('project-list');
+
+  let filtered = projects.filter(p => {
+    if (currentFilter === 'early') return p.early === 'yes';
+    if (currentFilter === 'hot') return p.heat === 3;
+    if (currentFilter === 'active') return p.status === 'active';
+    if (currentFilter === 'done') return p.status === 'done';
+    return true;
+  });
+
+  document.getElementById('stat-total').textContent = projects.length;
+  document.getElementById('stat-early').textContent = projects.filter(p => p.early === 'yes').length;
+  document.getElementById('stat-hot').textContent = projects.filter(p => p.heat === 3).length;
+
+  if (filtered.length === 0) {
+    list.innerHTML = `<div class="empty"><div class="empty-icon">🔍</div><h3>プロジェクトなし</h3><p>右上の＋ボタンから追加してください</p></div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map(p => {
+    const heat = '🔥'.repeat(p.heat);
+    const tasksDone = (p.tasks || []).filter(t => t.done).length;
+    const tasksTotal = (p.tasks || []).length;
+
+    const tasksHtml = (p.tasks || []).slice(0, 3).map((t, i) => `
+      <div class="task-item">
+        <div class="task-check ${t.done ? 'done' : ''}" onclick="event.stopPropagation(); toggleTask(${p.id}, ${(p.tasks || []).indexOf(t)})">
+          ${t.done ? '✓' : ''}
+        </div>
+        <span class="task-text ${t.done ? 'done' : ''}">${t.text}</span>
+      </div>
+    `).join('');
+
+    return `
+    <div class="project-card ${p.early === 'yes' ? 'early' : ''}" onclick="openDetail(${p.id})">
+      <div class="card-top">
+        <div>
+          <div class="project-name">${p.name}</div>
+          <div class="badges">
+            ${p.early === 'yes' ? '<span class="badge badge-early">⚡ 早期参入</span>' : ''}
+            <span class="badge ${p.status === 'done' ? 'badge-done' : 'badge-status'}">${getStatusLabel(p.status)}</span>
+          </div>
+        </div>
+        <div class="heat">${heat}</div>
+      </div>
+
+      <div class="card-meta">
+        <div class="meta-item">
+          <div class="meta-key">期待リターン</div>
+          <div class="meta-val">${getReturnBadge(p.return)}</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-key">参入タイミング</div>
+          <div class="meta-val" style="font-size:12px">${p.timing || '—'}</div>
+        </div>
+      </div>
+
+      ${tasksTotal > 0 ? `
+      <div class="tasks-preview">
+        <div class="tasks-label">タスク ${tasksDone}/${tasksTotal}</div>
+        ${tasksHtml}
+        ${tasksTotal > 3 ? `<div style="font-size:11px; color:var(--muted); margin-top:4px">他 ${tasksTotal - 3} 件...</div>` : ''}
+      </div>` : ''}
+
+      ${p.memo ? `<div style="margin-top:10px; font-size:12px; color:var(--muted); line-height:1.5">${p.memo}</div>` : ''}
+
+      <div class="card-actions">
+        ${p.url ? `<button class="action-btn" onclick="event.stopPropagation(); window.open('${p.url}', '_blank')">🔗 サイト</button>` : ''}
+        <button class="action-btn" onclick="event.stopPropagation(); openModal(${p.id})">✏️ 編集</button>
+        <button class="action-btn danger" onclick="event.stopPropagation(); deleteProject(${p.id})">🗑️ 削除</button>
+      </div>
+    </div>
+    `;
+  }).join('');
+}
+
+render();
+</script>
+
+</body>
+</html>
